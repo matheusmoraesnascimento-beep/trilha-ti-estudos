@@ -33,6 +33,7 @@ export function authMessage(err) {
   if (/Invalid login/i.test(m)) return 'E-mail ou senha incorretos.';
   if (/Email not confirmed/i.test(m)) return 'Confirme seu e-mail (veja a caixa de entrada) antes de entrar.';
   if (/already registered/i.test(m)) return 'Este e-mail já tem conta. Use "Entrar".';
+  if (/rate limit/i.test(m)) return 'Limite de e-mails do Supabase atingido (plano gratuito). Aguarde ~1 hora ou peça ao administrador para criar/confirmar a conta no painel.';
   if (/Password should be/i.test(m)) return 'Senha fraca: use ao menos 6 caracteres.';
   if (/fetch|network/i.test(m)) return 'Sem conexão com o servidor. Verifique a internet.';
   return m;
