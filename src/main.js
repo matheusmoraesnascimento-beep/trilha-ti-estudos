@@ -1,4 +1,5 @@
 import { configured } from './supabaseClient.js';
+import { OPEN_MODE } from '../config.js';
 import { h, field } from './dom.js';
 import { todayIn } from './dates.js';
 import * as repo from './repository.js';
@@ -69,6 +70,7 @@ async function boot() {
     app.replaceChildren(h('div', { class: 'card' }, h('h2', {}, 'Configuração pendente'), h('p', {}, 'Preencha SUPABASE_URL e SUPABASE_PUBLISHABLE_KEY em config.js (veja o README).')));
     return;
   }
+  if (OPEN_MODE) return start().then(() => { logout.hidden = true; });
   const auth = await import('./auth.js');
   logout.addEventListener('click', async () => { await auth.signOut(); });
   let started = false;

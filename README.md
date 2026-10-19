@@ -24,7 +24,8 @@ O zip original (`trilha-ti-agenda-github-pages.zip`) não foi encontrado; o app 
 5. `npm run serve` → http://localhost:8080 para testar local (adicione essa URL nos redirects).
 6. Suba ao GitHub; Settings → Pages → Source: GitHub Actions. O workflow roda os testes e publica.
 7. Entre, vá em Configurações → importar dados anteriores / agenda CSV (`date,exam,subject,title,content,minutes`; datas `AAAA-MM-DD`).
-8. Abra no celular com a mesma conta. Exporte backup JSON periodicamente (Free não garante backup/disponibilidade; projeto pausa por inatividade).
+8. (Modo aberto) rode também `002_open_single_user.sql`; o site dispensa login e qualquer um com a URL acessa os dados. Para voltar ao login: `OPEN_MODE = false` em config.js.
+9. Abra no celular com a mesma conta. Exporte backup JSON periodicamente (Free não garante backup/disponibilidade; projeto pausa por inatividade).
 
 ## Regras de revisão
 D+1, 3, 7, 15, 30, 45 + pré-prova (último dia útil antes). Fim de semana/feriado → próximo dia útil antes da prova, senão anterior; colisões são mescladas; nada após a prova. Idempotente (índice único `source_task_id + review_stage`). Revisão com <70% (ou "Difícil" sem questões) cria revisão extra no próximo dia útil, sinalizando excedente de 120 min sem apagar nada.
