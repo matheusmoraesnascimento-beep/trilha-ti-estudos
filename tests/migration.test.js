@@ -53,3 +53,20 @@ test('calendário inicial: 40 sessões, 19/10 a 11/12, 80 h, 7 revisões Linux',
   assert.equal(new Set(p.tasks.map((t) => t.source_legacy_id)).size, 40);
   assert.deepEqual(p.problems, []);
 });
+
+import { withGeneratedReviews } from '../src/migration.js';
+import { overflow } from '../src/reviewScheduler.js';
+
+test('todo estudo recebe revisões; Linux mantém as 7 originais; nada após a prova; idempotente', () => {
+  const a = withGeneratedReviews(STUDY_SEED);
+  const b = withGeneratedReviews(STUDY_SEED);
+  assert.deepEqual(a.generated, b.generated);
+  const plan = buildImportPlan(a.seed, null);
+  assert.equal(plan.reviews.filter((r) => r.of === 'linux-base').length, 7);
+  const examDate = Object.fromEntries(STUDY_SEED.exams.map((e) => [e.name, e.exam_date]));
+  const taskExam = new Map(STUDY_SEED.tasks.map((t) => [t.id, t.exam]));
+  assert.ok(plan.reviews.every((r) => r.date < examDate[taskExam.get(r.of)]));
+  assert.equal(new Set(plan.reviews.map((r) => r.source_legacy_id)).size, plan.reviews.length);
+  assert.ok(STUDY_SEED.tasks.filter((t) => t.date < '2026-12-01').every((t) => plan.reviews.some((r) => r.of === t.id)));
+  assert.deepEqual(plan.problems, []);
+});

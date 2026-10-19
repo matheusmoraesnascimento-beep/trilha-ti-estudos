@@ -1,7 +1,7 @@
 import { SUPABASE_URL as URL_, SUPABASE_PUBLISHABLE_KEY as KEY } from '../config.js';
 import { STUDY_SEED } from '../data.js';
 import { execFileSync } from 'node:child_process';
-import { buildImportPlan } from '../src/migration.js';
+import { buildImportPlan, withGeneratedReviews } from '../src/migration.js';
 
 const H = { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=representation' };
 
@@ -21,7 +21,9 @@ async function upsert(table, rows, onConflict) {
   return out;
 }
 
-const plan = buildImportPlan(STUDY_SEED, null);
+const { seed, generated, skipped } = withGeneratedReviews(STUDY_SEED);
+console.log(`revisões geradas: ${generated.length}; etapas não criadas (sem dia antes da prova): ${skipped.length}`);
+const plan = buildImportPlan(seed, null);
 if (plan.problems.length) throw new Error(plan.problems.join('; '));
 const exams = await upsert('exams', plan.exams, 'user_id,name');
 const subjects = await upsert('subjects', plan.subjects.map((name) => ({ name })), 'user_id,name');

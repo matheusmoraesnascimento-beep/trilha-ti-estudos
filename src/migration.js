@@ -1,4 +1,5 @@
 import { isValidDate } from './dates.js';
+import { suggestReviews, DEFAULT_MINUTES } from './reviewScheduler.js';
 
 export const LEGACY_KEY = 'trilha-ti-2026-v1';
 export const SCHEMA_VERSION = 1;
@@ -117,4 +118,24 @@ export function validateBackup(json) {
   if (json.schema_version !== SCHEMA_VERSION) return `versão de esquema incompatível (${json.schema_version})`;
   for (const k of ['exams', 'subjects', 'tasks', 'attempts', 'notes']) if (!Array.isArray(json[k])) return `campo ${k} ausente`;
   return null;
+}
+
+const STAGE_LABEL = (st) => (st === 'pre' ? 'pré-prova' : st.toUpperCase().replace('D', 'D+'));
+
+// Gera revisões D+1…D+45 + pré-prova para cada estudo sem revisões no seed. Ids estáveis (`<id>-<etapa>`): reimportar não duplica.
+export function withGeneratedReviews(seed, { weekdays = [1, 2, 3, 4, 5], holidays = [] } = {}) {
+  const examDate = new Map((seed.exams ?? []).map((e) => [e.name, e.exam_date]));
+  const hasReviews = new Set((seed.reviews ?? []).map((r) => r.of));
+  const generated = [];
+  const skipped = [];
+  for (const t of seed.tasks ?? []) {
+    const exam = examDate.get(t.exam);
+    if (!exam || hasReviews.has(t.id)) continue;
+    const r = suggestReviews({ startDate: t.date, examDate: exam, weekdays, holidays });
+    for (const rv of r.reviews) {
+      generated.push({ id: `${t.id}-${rv.stage}`, of: t.id, stage: rv.stage, date: rv.date, minutes: DEFAULT_MINUTES[rv.stage], title: `Revisão ${STAGE_LABEL(rv.stage)}: ${t.title}` });
+    }
+    for (const sk of r.skipped) skipped.push({ task: t.id, ...sk });
+  }
+  return { seed: { ...seed, reviews: [...(seed.reviews ?? []), ...generated] }, generated, skipped };
 }

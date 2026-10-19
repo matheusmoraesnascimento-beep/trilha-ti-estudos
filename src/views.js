@@ -4,7 +4,7 @@ import { state, examName, subjectName, opts, capacity } from './repository.js';
 import { formatBR, formatShort, addDays, nextStudyDay, countdown, weekday, weekStart, isValidDate } from './dates.js';
 import { overflow, suggestRelief } from './reviewScheduler.js';
 import { accuracy, validateAttempt, summarizeAttempts, hoursByWeek, statusCounts, hardestSubjects, minutesByExam } from './metrics.js';
-import { buildImportPlan, readLegacy, legacySummary, parseAgendaCsv, validateBackup, LEGACY_KEY } from './migration.js';
+import { buildImportPlan, withGeneratedReviews, readLegacy, legacySummary, parseAgendaCsv, validateBackup, LEGACY_KEY } from './migration.js';
 import { csvCell } from './sanitize.js';
 import { STUDY_SEED } from '../data.js';
 
@@ -284,7 +284,7 @@ export function performance() {
 
 function legacyImport(status) {
   const legacy = readLegacy(localStorage);
-  const plan = buildImportPlan(STUDY_SEED, legacy);
+  const plan = buildImportPlan(withGeneratedReviews(STUDY_SEED, opts()).seed, legacy);
   const s = legacySummary(legacy);
   openDialog('Importar dados anteriores para a nuvem', h('div', {},
     h('p', {}, s ? `Dados locais encontrados: ${s.tasks} tarefas, ${s.reviews} revisões, ${s.notes} notas.` : 'Nenhum dado local encontrado; será importado só o seed (Linux + 7 revisões).'),
