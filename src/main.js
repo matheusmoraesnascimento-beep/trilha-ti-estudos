@@ -4,6 +4,7 @@ import { h, field } from './dom.js';
 import { todayIn } from './dates.js';
 import * as repo from './repository.js';
 import * as views from './views.js';
+import { flushNotes } from './notesEditor.js';
 
 const app = document.getElementById('app');
 const nav = document.getElementById('nav');
@@ -24,7 +25,7 @@ addEventListener('online', () => repo.setStatus('idle'));
 
 function render() {
   views.ctx.today = todayIn(repo.state.prefs?.timezone);
-  nav.replaceChildren(...TABS.map(([id, label]) => h('button', { 'aria-current': id === tab ? 'page' : null, onClick: () => { tab = id; render(); } }, label)));
+  nav.replaceChildren(...TABS.map(([id, label]) => h('button', { 'aria-current': id === tab ? 'page' : null, onClick: async () => { await flushNotes(); tab = id; render(); } }, label)));
   app.replaceChildren(TABS.find(([id]) => id === tab)[2]());
 }
 views.ctx.rerender = render;

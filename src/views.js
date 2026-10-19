@@ -3,7 +3,7 @@ import * as repo from './repository.js';
 import { state, examName, subjectName, opts, capacity } from './repository.js';
 import { formatBR, formatShort, addDays, nextStudyDay, countdown, weekday, weekStart, isValidDate } from './dates.js';
 import { overflow, suggestRelief } from './reviewScheduler.js';
-import { accuracy, validateAttempt, summarizeAttempts, hoursByWeek, statusCounts, hardestSubjects, recurringErrors, minutesByExam } from './metrics.js';
+import { accuracy, validateAttempt, summarizeAttempts, hoursByWeek, statusCounts, hardestSubjects, minutesByExam } from './metrics.js';
 import { buildImportPlan, readLegacy, legacySummary, parseAgendaCsv, validateBackup, LEGACY_KEY } from './migration.js';
 import { csvCell } from './sanitize.js';
 import { STUDY_SEED } from '../data.js';
@@ -253,21 +253,7 @@ export function questions() {
     state.attempts.length ? [h('h3', {}, 'Por disciplina'), tbl(bySubject), h('h3', {}, 'Por concurso'), tbl(byExam)] : h('p', { class: 'muted' }, 'Nenhum registro de questões ainda.'));
 }
 
-export function notes() {
-  const f = ctx.noteFilter;
-  const bind = (el, k) => { el.addEventListener(el.tagName === 'INPUT' ? 'input' : 'change', () => { f[k] = el.value; ctx.rerender(); document.getElementById('nq')?.focus(); }); return el; };
-  const nq = bind(h('input', { id: 'nq', type: 'search', placeholder: 'Buscar…', value: f.q }), 'q');
-  const list = state.notes.filter((n) => (!f.type || n.note_type === f.type) && (!f.subject || n.subject_id === f.subject)
-    && (!f.q || `${n.title} ${n.body}`.toLowerCase().includes(f.q.toLowerCase())));
-  const rec = recurringErrors(state.notes, subjectName);
-  return h('section', {}, h('h2', {}, 'Anotações e caderno de erros'),
-    h('div', { class: 'grid card' }, nq, bind(sel(Object.entries(NOTE), f.type, 'Todas categorias'), 'type'), bind(sel(subjOptions(), f.subject, 'Todas disciplinas'), 'subject'), h('button', { class: 'pri', onClick: () => noteDialog() }, '+ Nova nota')),
-    rec.length ? h('div', { class: 'card' }, h('h3', {}, 'Erros recorrentes (não dominados)'), rec.map(([s, ns]) => h('div', {}, h('strong', {}, s), ` — ${ns.length}: `, ns.slice(0, 4).map((n) => n.title).join('; ')))) : null,
-    list.length ? list.map((n) => h('article', { class: 'card' }, h('div', { class: 'row' }, h('span', { class: 'tag' }, NOTE[n.note_type]), n.subject_id ? h('span', { class: 'tag' }, subjectName(n.subject_id)) : null, n.mastered ? h('span', { class: 'tag ok' }, 'Dominado') : null),
-      h('strong', {}, n.title), h('div', { style: 'white-space:pre-wrap' }, n.body),
-      h('div', { class: 'row' }, h('button', { onClick: () => noteDialog(n) }, 'Editar'), h('button', { class: 'danger', onClick: () => { if (confirm('Excluir esta nota?')) guard(() => repo.deleteNote(n.id)); } }, 'Excluir'))))
-      : h('p', { class: 'muted' }, 'Nenhuma nota encontrada.'));
-}
+export { notesView as notes } from './notesEditor.js';
 
 export function performance() {
   const tasks = state.tasks;
