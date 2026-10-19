@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import { buildImportPlan, parseAgendaCsv, validateBackup, legacySummary } from '../src/migration.js';
 import { STUDY_SEED } from '../data.js';
 
-test('seed: 1 estudo Linux + exatamente 7 revisões', () => {
+test('seed: estudo Linux + exatamente 7 revisões', () => {
   const p = buildImportPlan(STUDY_SEED, null);
-  assert.equal(p.tasks.length, 1);
+  assert.ok(p.tasks.some((t) => t.source_legacy_id === 'linux-base'));
   assert.equal(p.reviews.length, 7);
   assert.deepEqual(p.problems, []);
 });
@@ -17,7 +17,7 @@ test('estado local sobrepõe seed por id, sem duplicar (14 não)', () => {
   };
   const p = buildImportPlan(STUDY_SEED, legacy);
   assert.equal(p.reviews.length, 7);
-  assert.equal(p.tasks[0].status, 'done');
+  assert.equal(p.tasks.find((t) => t.source_legacy_id === 'linux-base').status, 'done');
   assert.equal(p.reviews.find((r) => r.source_legacy_id === 'linux-r1').status, 'done');
   assert.deepEqual(p.attempts.map((a) => [a.questions, a.correct]), [[20, 16]]);
   assert.equal(p.notes[0].note_type, 'error');
@@ -40,4 +40,16 @@ test('CSV de agenda', () => {
 test('validação de backup', () => {
   assert.ok(validateBackup({}));
   assert.equal(validateBackup({ schema_version: 1, exams: [], subjects: [], tasks: [], attempts: [], notes: [] }), null);
+});
+
+test('calendário inicial: 40 sessões, 19/10 a 11/12, 80 h, 7 revisões Linux', () => {
+  const p = buildImportPlan(STUDY_SEED, null);
+  assert.equal(p.tasks.length, 40);
+  assert.equal(p.reviews.length, 7);
+  assert.equal(p.tasks.reduce((s, t) => s + t.planned_minutes, 0), 80 * 60);
+  const dates = p.tasks.map((t) => t.date).sort();
+  assert.equal(dates[0], '2026-10-19');
+  assert.equal(dates.at(-1), '2026-12-11');
+  assert.equal(new Set(p.tasks.map((t) => t.source_legacy_id)).size, 40);
+  assert.deepEqual(p.problems, []);
 });

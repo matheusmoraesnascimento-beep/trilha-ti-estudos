@@ -11,7 +11,7 @@ Painel pessoal de estudos para concursos (Transpetro / CREMERJ). Front-end está
 | Teste RLS de 2 contas (`supabase/tests/rls.sql`) | Escrito; **não executado** |
 | UI (Hoje, Calendário, Revisões, Questões, Anotações, Desempenho, Configurações) + Auth | Escrita; **não testada no navegador** contra Supabase |
 | Offline | MVP: edição bloqueada com aviso (sem fila local) |
-| As 40 sessões de 19/10–11/12 | **Não estavam disponíveis.** `data.js` traz só Linux + 7 revisões. Importe o CSV (abaixo) |
+| As 40 sessões de 19/10–11/12 | Em `data.js` (vindas de `calendario_transpetro_cremerj.xlsx`) + 7 revisões de Linux |
 
 O zip original (`trilha-ti-agenda-github-pages.zip`) não foi encontrado; o app foi reconstruído. O leitor do `localStorage` (`trilha-ti-2026-v1`) assume `tasks`/`reviews`/`notes` como array ou mapa `id → objeto` com campos `date, title, status|done, questions, correct, minutes`; **confira com seus dados reais** antes de importar (a tela mostra prévia).
 
