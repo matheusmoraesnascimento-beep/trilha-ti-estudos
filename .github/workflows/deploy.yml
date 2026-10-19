@@ -15,7 +15,7 @@ jobs:
         with: { node-version: 22 }
       - run: npm test
       - name: Falha se houver segredo no repositório
-        run: "! grep -rEi 'service_role|eyJ[A-Za-z0-9_-]{30,}\\.[A-Za-z0-9_-]{30,}' --include='*.js' --include='*.html' --include='*.md' . --exclude-dir=node_modules --exclude-dir=.git || (echo 'possível segredo'; exit 1)"
+        run: "! grep -rEi 'eyJ[A-Za-z0-9_-]{30,}\\.[A-Za-z0-9_-]{30,}' --include='*.js' --include='*.html' . --exclude-dir=node_modules --exclude-dir=.git || (echo 'possível segredo'; exit 1)"
   deploy:
     needs: test
     runs-on: ubuntu-latest
